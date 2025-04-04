@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Game</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #FFEB3B;
+            text-align: center;
+            padding: 20px;
+            margin: 0 auto;
+            color: #333;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            gap: 8px;
+            margin: 20px auto;
+            justify-content: center;
+        }
+
+        .card {
+            height: 80px;
+            background: #FF5722;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,.2);
+            color: transparent;
+            cursor: pointer;
+            text-align: center;
+            line-height: 80px;
+            font-size: 32px;
+            transition: transform 0.3s ease, background 0.3s ease; 
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .flipped {
+            background: #4CAF50;
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        #newGame{
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        #newGame:hover{
+            background-color: #0D47A1;
+        }
+
+        #score {
+            font-weight: bold;
+            font-size: 24px;
+            color: #E91E63;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <span>Score: <span id="score">0</span></span>
+        <span style="margin-left: 20px">Time: <span id="timer">0</span> seconds</span> 
+    </div>
+    
+    <div id="grid" class="grid"></div>
+
+    <button id="newGame">New Game</button>
+    <script>
+        let flipped = [];
+        let score = 0;
+        let timerInterval;
+        let seconds = 0;
+        const emojis = [
+            '🍎', '🚀', '🌮', '🐱', '🌈', '⚽', 
+            '🍎', '🚀', '🌮', '🐱', '🌈', '⚽'
+        ];
+
+        function createGame(){
+            const shuffledEmojis = [...emojis].sort(() => Math.random() - .5);
+            const gridElement = document.getElementById('grid'); 
+            gridElement.innerHTML = '';
+            shuffledEmojis.forEach(emoji => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = emoji;
+                card.addEventListener('click', () =>
+                flipCard(card));
+                gridElement.appendChild(card);
+                });
+        }
+
+        function flipCard(card){
+            if(flipped.length === 2) return;
+            if (card.classList.contains('flipped')) return;
+            
+            card.classList.add('flipped');
+
+            flipped.push(card);
+
+            if(flipped.length === 2) {
+                setTimeout(() => {
+                    if(flipped[0].textContent === flipped[1].textContent) {
+                        score++;
+                        document.getElementById('score').textContent = score;
+                        checkGameComplete();
+                    } else {
+                        flipped[0].classList.remove('flipped');
+                        flipped[1].classList.remove('flipped');
+                    }
+                    flipped = [];
+                }, 500)
+            }
+        }
+
+        function startGame(){
+            score = 0;
+            document.getElementById('score').textContent = score;
+            flipped = [];
+            seconds = 0;
+            document.getElementById('timer').textContent = '0';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+            createGame();
+        }
+
+        function updateTimer(){
+            seconds++;
+            document.getElementById('timer').textContent = seconds;
+        }
+
+        function checkGameComplete(){
+            const allCards = document.querySelectorAll('.card');
+
+            const allFlipped = Array.from(allCards).every(card =>
+            card.classList.contains('flipped'));
+
+            if(allFlipped){
+                clearInterval(timerInterval);
+                setTimeout(() => {
+                    alert(`Congratulations! You completed the game in ${seconds} with a score of ${score}`);
+                }, 500)
+            }
+        }
+
+        document.getElementById('newGame').addEventListener('click', startGame)
+    </script>
+</body>
+</html>
